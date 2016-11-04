@@ -222,6 +222,7 @@ func handleFileLang(fname string, l Language) {
 	}
 	c, err := ioutil.ReadFile(fname)
 	if err != nil {
+		fmt.Fprintf(os.Stderr, "  ! %s\n", err.Error())
 		fmt.Fprintf(os.Stderr, "  ! %s\n", fname)
 		return
 	}
@@ -243,12 +244,16 @@ var files []string
 func add(n string) {
 	fi, err := os.Stat(n)
 	if err != nil {
-		goto invalid
+		fmt.Fprintf(os.Stderr, "  ! Stat %s\n", err)
+		fmt.Fprintf(os.Stderr, "  ! %s\n", n)
+		return
 	}
 	if fi.IsDir() {
 		fs, err := ioutil.ReadDir(n)
 		if err != nil {
-			goto invalid
+			fmt.Fprintf(os.Stderr, "  ! ReadDir %s\n", err)
+			fmt.Fprintf(os.Stderr, "  ! %s\n", n)
+			return
 		}
 		for _, f := range fs {
 			if f.Name() == ".nosloc" {
@@ -268,9 +273,6 @@ func add(n string) {
 	}
 
 	println(fi.Mode())
-
-invalid:
-	fmt.Fprintf(os.Stderr, "  ! %s\n", n)
 }
 
 type LData []LResult
