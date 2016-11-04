@@ -19,6 +19,7 @@ var languages = []Language{
 
 	Language{"C", mExt(".c", ".h"), cComments},
 	Language{"C++", mExt(".cc", ".cpp", ".cxx", ".hh", ".hpp", ".hxx"), cComments},
+	Language{"C#", mExt(".cs"), cComments},
 	Language{"Go", mExt(".go"), cComments},
 	Language{"Rust", mExt(".rs", ".rc"), cComments},
 	Language{"Scala", mExt(".scala"), cComments},
@@ -64,6 +65,7 @@ var languages = []Language{
 	Language{"XML", mExt(".xml"), xmlComments},
 	Language{"CSS", mExt(".css"), cssComments},
 	Language{"JavaScript", mExt(".js"), cComments},
+	Language{"TypeScript", mExt(".ts"), cComments},
 	Language{"CoffeeScript", mExt(".coffee"), coffeeComments},
 
 	Language{"Erlang", mExt(".erl"), erlangComments},
