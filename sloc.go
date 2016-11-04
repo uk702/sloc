@@ -12,7 +12,7 @@ import (
 	"text/tabwriter"
 )
 
-const VERSION = `0.1.1`
+const VERSION = `0.3`
 
 var languages = []Language{
 	Language{"Thrift", mExt(".thrift"), cComments},
@@ -20,23 +20,31 @@ var languages = []Language{
 	Language{"C", mExt(".c", ".h"), cComments},
 	Language{"C++", mExt(".cc", ".cpp", ".cxx", ".hh", ".hpp", ".hxx"), cComments},
 	Language{"Go", mExt(".go"), cComments},
+	Language{"Rust", mExt(".rs", ".rc"), cComments},
 	Language{"Scala", mExt(".scala"), cComments},
 	Language{"Java", mExt(".java"), cComments},
 
 	Language{"YACC", mExt(".y"), cComments},
 	Language{"Lex", mExt(".l"), cComments},
 
+	Language{"Lua", mExt(".lua"), luaComments},
+
 	Language{"SQL", mExt(".sql"), sqlComments},
 
 	Language{"Haskell", mExt(".hs", ".lhs"), hsComments},
+	Language{"ML", mExt(".ml", ".mli"), mlComments},
 
-	Language{"Perl", mExt(".pl", ".pm"), shComments},
+	Language{"Perl", mExt(".pl", ".pm"), perlComments},
 	Language{"PHP", mExt(".php"), cComments},
 
 	Language{"Shell", mExt(".sh"), shComments},
 	Language{"Bash", mExt(".bash"), shComments},
+	Language{"R", mExt(".r", ".R"), shComments},
+	Language{"Tcl", mExt(".tcl"), shComments},
 
-	Language{"Ruby", mExt(".rb"), shComments},
+	Language{"MATLAB", mExt(".m"), matlabComments},
+
+	Language{"Ruby", mExt(".rb"), rubyComments},
 	Language{"Python", mExt(".py"), pyComments},
 	Language{"Assembly", mExt(".asm", ".s"), semiComments},
 	Language{"Lisp", mExt(".lsp", ".lisp"), semiComments},
@@ -56,7 +64,9 @@ var languages = []Language{
 	Language{"XML", mExt(".xml"), xmlComments},
 	Language{"CSS", mExt(".css"), cssComments},
 	Language{"JavaScript", mExt(".js"), cComments},
-	Language{"JSON", mExt(".json"), noComments},
+	Language{"CoffeeScript", mExt(".coffee"), coffeeComments},
+
+	Language{"Erlang", mExt(".erl"), erlangComments},
 }
 
 type Commenter struct {
@@ -67,15 +77,24 @@ type Commenter struct {
 }
 
 var (
-	noComments = Commenter{"\000", "\000", "\000", false}
-	xmlComments = Commenter{"\000", `<!--`, `-->`, false}
-	cComments  = Commenter{`//`, `/*`, `*/`, false}
-	cssComments  = Commenter{"\000", `/*`, `*/`, false}
-	shComments = Commenter{`#`, "\000", "\000", false}
-	semiComments = Commenter{`;`, "\000", "\000", false}
-	hsComments  = Commenter{`--`, `{-`, `-}`, true}
-	sqlComments  = Commenter{`--`, "\000", "\000", false}
-	pyComments = Commenter{`#`, `"""`, `"""`, false}
+	noComments     = Commenter{"\000", "\000", "\000", false}
+	xmlComments    = Commenter{"\000", `<!--`, `-->`, false}
+	cComments      = Commenter{`//`, `/*`, `*/`, false}
+	cssComments    = Commenter{"\000", `/*`, `*/`, false}
+	shComments     = Commenter{`#`, "\000", "\000", false}
+	semiComments   = Commenter{`;`, "\000", "\000", false}
+	hsComments     = Commenter{`--`, `{-`, `-}`, true}
+	mlComments     = Commenter{`\000`, `(*`, `*)`, false}
+	sqlComments    = Commenter{`--`, `/*`, `*/`, false}
+	luaComments    = Commenter{`--`, `--[[`, `]]`, false}
+	pyComments     = Commenter{`#`, `"""`, `"""`, false}
+	matlabComments = Commenter{`%`, `%{`, `%}`, false}
+	erlangComments = Commenter{`%`, "\000", "\000", false}
+	rubyComments   = Commenter{`#`, "=begin", "=end", false}
+	coffeeComments = Commenter{`#`, "###", "###", false}
+
+	// TODO support POD and __END__
+	perlComments = Commenter{`#`, "\000", "\000", false}
 )
 
 type Language struct {
@@ -103,7 +122,9 @@ func (l Language) Update(c []byte, s *Stats) {
 				inLComment = true
 				lp = 0
 			}
-		} else { lp = 0 }
+		} else {
+			lp = 0
+		}
 		if !inLComment && b == sc[sp] {
 			sp++
 			if sp == len(sc) {
@@ -113,14 +134,20 @@ func (l Language) Update(c []byte, s *Stats) {
 				}
 				sp = 0
 			}
-		} else { sp = 0 }
+		} else {
+			sp = 0
+		}
 		if !inLComment && inComment > 0 && b == ec[ep] {
 			ep++
 			if ep == len(ec) {
-				if inComment > 0 { inComment-- }
+				if inComment > 0 {
+					inComment--
+				}
 				ep = 0
 			}
-		} else { ep = 0 }
+		} else {
+			ep = 0
+		}
 
 		if b != byte(' ') && b != byte('\t') && b != byte('\n') && b != byte('\r') {
 			blank = false
@@ -136,7 +163,9 @@ func (l Language) Update(c []byte, s *Stats) {
 				s.CommentLines++
 			} else if blank {
 				s.BlankLines++
-			} else { s.CodeLines++ }
+			} else {
+				s.CodeLines++
+			}
 			blank = true
 			continue
 		}
@@ -183,19 +212,7 @@ type Stats struct {
 
 var info = map[string]*Stats{}
 
-func handleFile(fname string) {
-	var l Language
-	ok := false
-	for _, lang := range languages {
-		if lang.Match(fname) {
-			ok = true
-			l = lang
-			break
-		}
-	}
-	if !ok {
-		return // ignore this file
-	}
+func handleFileLang(fname string, l Language) {
 	i, ok := info[l.Name()]
 	if !ok {
 		i = &Stats{}
@@ -209,6 +226,16 @@ func handleFile(fname string) {
 	l.Update(c, i)
 }
 
+func handleFile(fname string) {
+	for _, lang := range languages {
+		if lang.Match(fname) {
+			handleFileLang(fname, lang)
+			return
+		}
+	}
+	// TODO No recognized extension - check for hashbang
+}
+
 var files []string
 
 func add(n string) {
@@ -220,6 +247,11 @@ func add(n string) {
 		fs, err := ioutil.ReadDir(n)
 		if err != nil {
 			goto invalid
+		}
+		for _, f := range fs {
+			if f.Name() == ".nosloc" {
+				return
+			}
 		}
 		for _, f := range fs {
 			if f.Name()[0] != '.' {
@@ -255,12 +287,12 @@ func (d LData) Swap(i, j int) {
 }
 
 type LResult struct {
-	Name string
-	FileCount int
-	CodeLines int
+	Name         string
+	FileCount    int
+	CodeLines    int
 	CommentLines int
-	BlankLines int
-	TotalLines int
+	BlankLines   int
+	TotalLines   int
 }
 
 func (r *LResult) Add(a LResult) {
@@ -273,7 +305,9 @@ func (r *LResult) Add(a LResult) {
 
 func printJSON() {
 	bs, err := json.MarshalIndent(info, "", "  ")
-	if err != nil { panic(err) }
+	if err != nil {
+		panic(err)
+	}
 	fmt.Println(string(bs))
 }
 
@@ -284,30 +318,14 @@ func printInfo() {
 	total := &LResult{}
 	total.Name = "Total"
 	for n, i := range info {
-		r := LResult{
-			n,
-			i.FileCount,
-			i.CodeLines,
-			i.CommentLines,
-			i.BlankLines,
-			i.TotalLines,
-		}
+		r := LResult{n, i.FileCount, i.CodeLines, i.CommentLines, i.BlankLines, i.TotalLines}
 		d = append(d, r)
 		total.Add(r)
 	}
 	d = append(d, *total)
 	sort.Sort(d)
-	//d[0].Name = "Total"
 	for _, i := range d {
-		fmt.Fprintf(
-			w,
-			"%s\t%d\t%d\t%d\t%d\t%d\t\n",
-			i.Name,
-			i.FileCount,
-			i.CodeLines,
-			i.CommentLines,
-			i.BlankLines,
-			i.TotalLines)
+		fmt.Fprintf(w, "%s\t%d\t%d\t%d\t%d\t%d\t\n", i.Name, i.FileCount, i.CodeLines, i.CommentLines, i.BlankLines, i.TotalLines)
 	}
 
 	w.Flush()
@@ -315,8 +333,8 @@ func printInfo() {
 
 var (
 	cpuprofile = flag.String("cpuprofile", "", "write cpu profile to file")
-	useJson = flag.Bool("json", false, "JSON-format output")
-	version = flag.Bool("V", false, "display version info and exit")
+	useJson    = flag.Bool("json", false, "JSON-format output")
+	version    = flag.Bool("V", false, "display version info and exit")
 )
 
 func main() {
