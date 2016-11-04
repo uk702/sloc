@@ -15,60 +15,60 @@ import (
 const VERSION = `0.3`
 
 var languages = []Language{
-	Language{"Thrift", mExt(".thrift"), cComments},
+	{"Thrift", mExt(".thrift"), cComments},
 
-	Language{"C", mExt(".c", ".h"), cComments},
-	Language{"C++", mExt(".cc", ".cpp", ".cxx", ".hh", ".hpp", ".hxx"), cComments},
-	Language{"C#", mExt(".cs"), cComments},
-	Language{"Go", mExt(".go"), cComments},
-	Language{"Rust", mExt(".rs", ".rc"), cComments},
-	Language{"Scala", mExt(".scala"), cComments},
-	Language{"Java", mExt(".java"), cComments},
+	{"C", mExt(".c", ".h"), cComments},
+	{"C++", mExt(".cc", ".cpp", ".cxx", ".hh", ".hpp", ".hxx"), cComments},
+	{"C#", mExt(".cs"), cComments},
+	{"Go", mExt(".go"), cComments},
+	{"Rust", mExt(".rs", ".rc"), cComments},
+	{"Scala", mExt(".scala"), cComments},
+	{"Java", mExt(".java"), cComments},
 
-	Language{"YACC", mExt(".y"), cComments},
-	Language{"Lex", mExt(".l"), cComments},
+	{"YACC", mExt(".y"), cComments},
+	{"Lex", mExt(".l"), cComments},
 
-	Language{"Lua", mExt(".lua"), luaComments},
+	{"Lua", mExt(".lua"), luaComments},
 
-	Language{"SQL", mExt(".sql"), sqlComments},
+	{"SQL", mExt(".sql"), sqlComments},
 
-	Language{"Haskell", mExt(".hs", ".lhs"), hsComments},
-	Language{"ML", mExt(".ml", ".mli"), mlComments},
+	{"Haskell", mExt(".hs", ".lhs"), hsComments},
+	{"ML", mExt(".ml", ".mli"), mlComments},
 
-	Language{"Perl", mExt(".pl", ".pm"), perlComments},
-	Language{"PHP", mExt(".php"), cComments},
+	{"Perl", mExt(".pl", ".pm"), perlComments},
+	{"PHP", mExt(".php"), cComments},
 
-	Language{"Shell", mExt(".sh"), shComments},
-	Language{"Bash", mExt(".bash"), shComments},
-	Language{"R", mExt(".r", ".R"), shComments},
-	Language{"Tcl", mExt(".tcl"), shComments},
+	{"Shell", mExt(".sh"), shComments},
+	{"Bash", mExt(".bash"), shComments},
+	{"R", mExt(".r", ".R"), shComments},
+	{"Tcl", mExt(".tcl"), shComments},
 
-	Language{"MATLAB", mExt(".m"), matlabComments},
+	{"MATLAB", mExt(".m"), matlabComments},
 
-	Language{"Ruby", mExt(".rb"), rubyComments},
-	Language{"Python", mExt(".py"), pyComments},
-	Language{"Assembly", mExt(".asm", ".s"), semiComments},
-	Language{"Lisp", mExt(".lsp", ".lisp"), semiComments},
-	Language{"Scheme", mExt(".scm", ".scheme"), semiComments},
+	{"Ruby", mExt(".rb"), rubyComments},
+	{"Python", mExt(".py"), pyComments},
+	{"Assembly", mExt(".asm", ".s"), semiComments},
+	{"Lisp", mExt(".lsp", ".lisp"), semiComments},
+	{"Scheme", mExt(".scm", ".scheme"), semiComments},
 
-	Language{"Make", mName("makefile", "Makefile", "MAKEFILE"), shComments},
-	Language{"CMake", mName("CMakeLists.txt"), shComments},
-	Language{"Jam", mName("Jamfile", "Jamrules"), shComments},
+	{"Make", mName("makefile", "Makefile", "MAKEFILE"), shComments},
+	{"CMake", mName("CMakeLists.txt"), shComments},
+	{"Jam", mName("Jamfile", "Jamrules"), shComments},
 
-	Language{"Markdown", mExt(".md"), noComments},
+	{"Markdown", mExt(".md"), noComments},
 
-	Language{"HAML", mExt(".haml"), noComments},
-	Language{"SASS", mExt(".sass"), cssComments},
-	Language{"SCSS", mExt(".scss"), cssComments},
+	{"HAML", mExt(".haml"), noComments},
+	{"SASS", mExt(".sass"), cssComments},
+	{"SCSS", mExt(".scss"), cssComments},
 
-	Language{"HTML", mExt(".htm", ".html", ".xhtml"), xmlComments},
-	Language{"XML", mExt(".xml"), xmlComments},
-	Language{"CSS", mExt(".css"), cssComments},
-	Language{"JavaScript", mExt(".js"), cComments},
-	Language{"TypeScript", mExt(".ts"), cComments},
-	Language{"CoffeeScript", mExt(".coffee"), coffeeComments},
+	{"HTML", mExt(".htm", ".html", ".xhtml"), xmlComments},
+	{"XML", mExt(".xml"), xmlComments},
+	{"CSS", mExt(".css"), cssComments},
+	{"JavaScript", mExt(".js"), cComments},
+	{"TypeScript", mExt(".ts"), cComments},
+	{"CoffeeScript", mExt(".coffee"), coffeeComments},
 
-	Language{"Erlang", mExt(".erl"), erlangComments},
+	{"Erlang", mExt(".erl"), erlangComments},
 }
 
 type Commenter struct {
