@@ -9,6 +9,7 @@ import (
 	"path"
 	"runtime/pprof"
 	"sort"
+	"strings"
 	"text/tabwriter"
 )
 
@@ -21,9 +22,12 @@ var languages = []Language{
 	{"C++", mExt(".cc", ".cpp", ".cxx", ".hh", ".hpp", ".hxx"), cComments},
 	{"C#", mExt(".cs"), cComments},
 	{"Go", mExt(".go"), cComments},
+	{"GoTest", mExt(".go"), cComments},
+
 	{"Rust", mExt(".rs", ".rc"), cComments},
 	{"Scala", mExt(".scala"), cComments},
 	{"Java", mExt(".java"), cComments},
+	{"Typescript", mExt(".ts"), cComments},
 
 	{"YACC", mExt(".y"), cComments},
 	{"Lex", mExt(".l"), cComments},
@@ -232,8 +236,13 @@ func handleFileLang(fname string, l Language) {
 func handleFile(fname string) {
 	for _, lang := range languages {
 		if lang.Match(fname) {
-			handleFileLang(fname, lang)
-			return
+			// Lilx
+			if lang.Name() != "GoTest" || strings.HasSuffix(fname, "_test.go") {
+				handleFileLang(fname, lang)
+			}
+
+			// Lilx，支持一个文件同时符合多种语言并进行统计
+			// return
 		}
 	}
 	// TODO No recognized extension - check for hashbang
