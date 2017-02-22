@@ -27,7 +27,6 @@ var languages = []Language{
 	{"Rust", mExt(".rs", ".rc"), cComments},
 	{"Scala", mExt(".scala"), cComments},
 	{"Java", mExt(".java"), cComments},
-	{"Typescript", mExt(".ts"), cComments},
 
 	{"YACC", mExt(".y"), cComments},
 	{"Lex", mExt(".l"), cComments},
